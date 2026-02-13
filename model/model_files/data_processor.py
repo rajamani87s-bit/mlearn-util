@@ -5,13 +5,15 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 from typing import Optional, Dict, Any
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 class DataProcessor:
-    """Handles data loading, cleaning, and preprocessing operations"""
-    
+   
     def __init__(self):
         self.data = None
         self.original_data = None
+        self.scaler = StandardScaler()
+        self.label_encoder = LabelEncoder()
     
     def load_data(self, uploaded_file) -> Optional[pd.DataFrame]:
         """
@@ -30,10 +32,10 @@ class DataProcessor:
                 self.original_data = df.copy()
                 return df
             else:
-                st.error("❌ Unsupported file format. Please upload a CSV file.")
+                st.error("Unsupported file format. Please upload a CSV file.")
                 return None
         except Exception as e:
-            st.error(f"❌ Error loading file: {str(e)}")
+            st.error(f"Error loading file: {str(e)}")
             return None
     
     def get_data_info(self, df: pd.DataFrame) -> Dict[str, Any]:
@@ -58,13 +60,12 @@ class DataProcessor:
         }
         return info
     
-    def clean_data(self, df: pd.DataFrame, options: Dict[str, Any]) -> pd.DataFrame:
+    def prepare_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Clean the dataset based on provided options
         
         Args:
             df: Input dataframe
-            options: Dictionary containing cleaning options
             
         Returns:
             pd.DataFrame: Cleaned dataframe
@@ -72,34 +73,39 @@ class DataProcessor:
         cleaned_df = df.copy()
         
         # Handle missing values
-        if options.get('drop_missing', False):
-            cleaned_df = cleaned_df.dropna()
+
+        cleaned_df = cleaned_df.dropna()
         
-        if options.get('fill_missing', False):
-            # Fill numeric columns with mean
-            numeric_cols = cleaned_df.select_dtypes(include=[np.number]).columns
-            cleaned_df[numeric_cols] = cleaned_df[numeric_cols].fillna(cleaned_df[numeric_cols].mean())
-            
-            # Fill categorical columns with mode
-            cat_cols = cleaned_df.select_dtypes(include=['object']).columns
-            for col in cat_cols:
-                mode_value = cleaned_df[col].mode()
-                if not mode_value.empty:
-                    cleaned_df[col] = cleaned_df[col].fillna(mode_value[0])
+
+        # Fill numeric columns with mean
+        numeric_cols = cleaned_df.select_dtypes(include=[np.number]).columns
+        cleaned_df[numeric_cols] = cleaned_df[numeric_cols].fillna(cleaned_df[numeric_cols].mean())
+        
+        # Fill categorical columns with mode
+        cat_cols = cleaned_df.select_dtypes(include=['object']).columns
+        for col in cat_cols:
+            mode_value = cleaned_df[col].mode()
+            if not mode_value.empty:
+                cleaned_df[col] = cleaned_df[col].fillna(mode_value[0])
         
         # Remove duplicates
-        if options.get('drop_duplicates', False):
-            cleaned_df = cleaned_df.drop_duplicates()
+
+        cleaned_df = cleaned_df.drop_duplicates()
+
         
-        # Convert data types if specified
-        if 'type_conversions' in options:
-            for col, dtype in options['type_conversions'].items():
-                try:
-                    cleaned_df[col] = cleaned_df[col].astype(dtype)
-                except Exception as e:
-                    st.warning(f"⚠️ Could not convert {col} to {dtype}: {str(e)}")
+        # Separate features and target
+        X = cleaned_df.drop(columns=['Status'])
+        y = cleaned_df['Status']
         
-        return cleaned_df
+        # Handle categorical variables (simple one-hot encoding)
+        categorical_columns = X.select_dtypes(include=['object']).columns
+        if not categorical_columns.empty:
+            X = pd.get_dummies(X, columns=categorical_columns, drop_first=True)
+
+        X_scaled = self.scaler.fit_transform(X)
+        
+        return X_scaled, y
+
     
     def get_column_statistics(self, df: pd.DataFrame, column: str) -> Dict[str, Any]:
         """
@@ -144,28 +150,4 @@ class DataProcessor:
             })
         
         return stats
-    
-    def prepare_for_modeling(self, df: pd.DataFrame, target_column: str) -> tuple:
-        """
-        Prepare data for machine learning modeling
-        
-        Args:
-            df: Input dataframe
-            target_column: Name of target column
-            
-        Returns:
-            tuple: (X, y) features and target
-        """
-        if target_column not in df.columns:
-            raise ValueError(f"Target column '{target_column}' not found in dataset")
-        
-        # Separate features and target
-        X = df.drop(columns=[target_column])
-        y = df[target_column]
-        
-        # Handle categorical variables (simple one-hot encoding)
-        categorical_columns = X.select_dtypes(include=['object']).columns
-        if not categorical_columns.empty:
-            X = pd.get_dummies(X, columns=categorical_columns, drop_first=True)
-        
-        return X, y
+
