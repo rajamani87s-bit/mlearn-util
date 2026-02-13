@@ -52,22 +52,25 @@ class ModelTrainer:
             raise ValueError(f"Model '{model_name}' not available")
         
         try:
+            # Encode target variable to fix XGBoost issue
+            if y.dtype == 'object' or isinstance(y.iloc[0], str):
+                y_encoded = self.label_encoder.fit_transform(y)
+                y = pd.Series(y_encoded, index=y.index, name=y.name)
+            
             # Split the data
             X_train, X_test, y_train, y_test = train_test_split(
                 X, y, test_size=test_size, random_state=random_state, stratify=y
             )
-                
+
             # Get and train the model
             model = self.models[model_name]
             
-            if model_name == "XGBoost Classifier":
-                y_pred_test,y_pred_train = model.fit(X_train, y_train, eval_set=[(X_test, y_test)], early_stopping_rounds=10, verbose=False)
-            else:
-                model.fit(X_train, y_train)
-                
-                # Make predictions
-                y_pred_train = model.predict(X_train)
-                y_pred_test = model.predict(X_test)
+
+            model.fit(X_train, y_train)
+            
+            # Make predictions
+            y_pred_train = model.predict(X_train)
+            y_pred_test = model.predict(X_test)
             
             # Calculate metrics
             train_accuracy = accuracy_score(y_train, y_pred_train)
