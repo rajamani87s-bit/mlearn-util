@@ -52,11 +52,16 @@ class ModelTrainer:
             raise ValueError(f"Model '{model_name}' not available")
         
         try:
+            # Encode target variable to fix XGBoost issue
+            if y.dtype == 'object' or isinstance(y.iloc[0], str):
+                y_encoded = self.label_encoder.fit_transform(y)
+                y = pd.Series(y_encoded, index=y.index, name=y.name)
+
             # Split the data
             X_train, X_test, y_train, y_test = train_test_split(
                 X, y, test_size=test_size, random_state=random_state, stratify=y
             )
-                
+
             # Get and train the model
             model = self.models[model_name]
             
