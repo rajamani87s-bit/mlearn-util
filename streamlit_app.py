@@ -31,7 +31,7 @@ if uploaded_file is not None:
     # Load the data into session state
     try:
         if(uploaded_file.name != "Breast_Cancer.csv"):
-            st.sidebar.warning("Please upload the sample dataset 'Breast_Cancer.csv'")
+            st.sidebar.warning("Please upload the sample dataset 'Breast_Cancer.csv', which you can download from the option above.")
         else:
             data = pd.read_csv(uploaded_file)
             st.session_state['data'] = data
