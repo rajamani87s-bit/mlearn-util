@@ -60,11 +60,14 @@ class ModelTrainer:
             # Get and train the model
             model = self.models[model_name]
             
-            model.fit(X_train, y_train)
-            
-            # Make predictions
-            y_pred_train = model.predict(X_train)
-            y_pred_test = model.predict(X_test)
+            if model_name == "XGBoost Classifier":
+                y_pred_test,y_pred_train = model.fit(X_train, y_train, eval_set=[(X_test, y_test)], early_stopping_rounds=10, verbose=False)
+            else:
+                model.fit(X_train, y_train)
+                
+                # Make predictions
+                y_pred_train = model.predict(X_train)
+                y_pred_test = model.predict(X_test)
             
             # Calculate metrics
             train_accuracy = accuracy_score(y_train, y_pred_train)
