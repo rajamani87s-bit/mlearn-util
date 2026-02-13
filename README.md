@@ -3,15 +3,15 @@
 
 ## a. Problem Statement
 
-As a part of this assignment, I am trying to predict the current survival status of the patients who were diagnised with breast cancer. This is a research problem which tries to analyze the survival status of the patients, based on the patient test data given in the dataset.
+As a part of this assignment, I am trying to predict the current survival status of the patients who were diagnosed with breast cancer. This is a research problem which tries to analyze the survival status of the patients, based on the patient test data given in the dataset.
 
 ## b. Dataset Description
 
-This dataset "Breast_Cancer.csv" is downloaded from Kaggle. The dataset has a total of 15 features, out of which 10 features are categorical and required one-hot encoding. I have removed few features from the dataset (like patient name, etc.) which were not relevant to the problem. Th eoutput label is also one-hot encoded as the XGBoost model failed to parse the non-encoded categorical data.
+This dataset "Breast_Cancer.csv" is downloaded from Kaggle. [Link: https://www.kaggle.com/datasets/reihanenamdari/breast-cancer/data] The dataset has a total of 15 features, out of which 10 features are categorical and required one-hot encoding. I have removed few features from the dataset (like patient name, etc.) which were not relevant to the problem. The output label is also one-hot encoded as the XGBoost model failed to parse the non-encoded categorical data.
 
 ## c. Models Used
 
-I have used the following models for the comparfison and analysis:
+I have used the following models for the comparison and analysis:
 * Simple Logistic Regression
 * Decision Tree Model
 * K-Nearest Neighbors Model
