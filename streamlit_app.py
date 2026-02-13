@@ -30,10 +30,13 @@ uploaded_file = st.sidebar.file_uploader("Upload a file", type=['csv'])
 if uploaded_file is not None:
     # Load the data into session state
     try:
-        data = pd.read_csv(uploaded_file)
-        st.session_state['data'] = data
-        st.session_state['file_name'] = uploaded_file.name
-        st.sidebar.success(f"Loaded: {uploaded_file.name}")
+        if(uploaded_file.name != "Breast_Cancer.csv"):
+            st.sidebar.warning("Please upload the sample dataset 'Breast_Cancer.csv'")
+        else:
+            data = pd.read_csv(uploaded_file)
+            st.session_state['data'] = data
+            st.session_state['file_name'] = uploaded_file.name
+            st.sidebar.success(f"Loaded: {uploaded_file.name}")
     except Exception as e:
         st.sidebar.error(f"Error loading file: {str(e)}")
 
