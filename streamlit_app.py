@@ -34,13 +34,11 @@ if uploaded_file is not None:
         st.session_state['data'] = data
         st.session_state['file_name'] = uploaded_file.name
         st.sidebar.success(f"Loaded: {uploaded_file.name}")
-        st.sidebar.write(f"Shape: {data.shape[0]} rows × {data.shape[1]} columns")
     except Exception as e:
         st.sidebar.error(f"Error loading file: {str(e)}")
 
 options = ["--Select--", "Simple Logistic Regression", "Decision Tree Model", "K-NN Model", "Naive Bayes Guassian Model", "Random Forest", "XGBoost Classifier"]
-st.sidebar.subheader("Select the model you want to train")
-selected_model = st.sidebar.selectbox("Please select the model: ", options)
+selected_model = st.sidebar.selectbox("Select the model you want to train: ", options)
 
 # Store selected model in session state
 if selected_model != "--Select--":
@@ -50,8 +48,7 @@ else:
 
 # Only show parameters if data is loaded and model is selected
 if 'data' in st.session_state and st.session_state.get('selected_model'):
-    st.sidebar.subheader("Configuration")
-    test_split = st.sidebar.slider("Test Split Ratio", 0.1, 0.5, 0.2)
+    test_split = st.sidebar.slider("Select Train/Test Split Ratio", 0.1, 0.5, 0.2)
     st.session_state['test_split'] = test_split
     
 
@@ -61,7 +58,7 @@ st.write("Use the sidebar to upload data, select a model, and train it.")
 # Show training results if available
 if 'training_results' in st.session_state:
     results = st.session_state['training_results']
-    st.success(f"✅ Previously trained: **{results['model_name']}**")
+    st.success(f"Previously trained: **{results['model_name']}**")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -69,7 +66,7 @@ if 'training_results' in st.session_state:
     with col2:
         st.metric("Test Accuracy", f"{results['test_accuracy']:.4f}")
 
-st.title("📊 Dashboard")
+st.title("Dashboard")
 
 # Check if data is available
 if 'data' not in st.session_state:
@@ -135,7 +132,7 @@ with main_tab2:
                         st.session_state['training_results'] = results
                         st.session_state['all_results'][model_name] = results
                         
-                        st.success(f"✅ {model_name} trained successfully!")
+                        st.success(f"{model_name} trained successfully!")
                         
                         # Store results in session state
                         st.session_state['training_results'] = results
